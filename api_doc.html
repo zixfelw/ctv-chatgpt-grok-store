@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>API Documentation — CTV API</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f111a; --surface: #1a1d2e; --surface2: #232640;
+    --border: #2a2d45; --text: #e2e8f0; --text2: #94a3b8;
+    --accent: #6366f1; --accent2: #818cf8; --green: #22c55e;
+    --red: #ef4444; --yellow: #eab308; --blue: #3b82f6;
+    --code-bg: #0d0f17;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; line-height:1.7; }
+  .container { max-width:880px; margin:0 auto; padding:40px 24px 80px; }
+
+  /* Header */
+  .header { text-align:center; margin-bottom:48px; padding:40px 0 32px; border-bottom:1px solid var(--border); }
+  .header h1 { font-size:2rem; font-weight:700; background:linear-gradient(135deg,var(--accent2),var(--green)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  .header p { color:var(--text2); margin-top:8px; font-size:.95rem; }
+  .badge { display:inline-block; background:var(--surface2); border:1px solid var(--border); padding:4px 12px; border-radius:20px; font-size:.75rem; color:var(--accent2); font-weight:600; margin-top:12px; }
+
+  /* Nav */
+  .nav { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px 24px; margin-bottom:40px; }
+  .nav h3 { font-size:.8rem; text-transform:uppercase; letter-spacing:1px; color:var(--text2); margin-bottom:12px; }
+  .nav a { display:block; color:var(--accent2); text-decoration:none; padding:6px 0; font-size:.9rem; transition:color .2s; }
+  .nav a:hover { color:var(--green); }
+  .nav a .method { display:inline-block; width:48px; font-family:'JetBrains Mono',monospace; font-size:.7rem; font-weight:600; text-align:center; padding:2px 0; border-radius:4px; margin-right:8px; }
+  .nav a .method.get { background:#22c55e22; color:var(--green); }
+  .nav a .method.post { background:#3b82f622; color:var(--blue); }
+
+  /* Section */
+  .section { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:28px; margin-bottom:24px; }
+  .section h2 { font-size:1.15rem; font-weight:600; margin-bottom:4px; display:flex; align-items:center; gap:10px; }
+  .section h2 .method-badge { font-family:'JetBrains Mono',monospace; font-size:.7rem; font-weight:700; padding:4px 10px; border-radius:6px; }
+  .section h2 .method-badge.get { background:#22c55e22; color:var(--green); border:1px solid #22c55e44; }
+  .section h2 .method-badge.post { background:#3b82f622; color:var(--blue); border:1px solid #3b82f644; }
+  .endpoint { font-family:'JetBrains Mono',monospace; font-size:.9rem; color:var(--accent2); }
+  .desc { color:var(--text2); font-size:.88rem; margin:8px 0 16px; }
+
+  /* Code blocks */
+  pre { background:var(--code-bg); border:1px solid var(--border); border-radius:8px; padding:16px 20px; overflow-x:auto; font-family:'JetBrains Mono',monospace; font-size:.8rem; line-height:1.8; color:#c9d1d9; margin:8px 0 16px; white-space:pre; }
+  .label { font-size:.75rem; font-weight:600; text-transform:uppercase; letter-spacing:.5px; margin-bottom:4px; }
+  .label.req { color:var(--blue); }
+  .label.res { color:var(--green); }
+  .label.err { color:var(--red); }
+
+  /* Table */
+  table { width:100%; border-collapse:collapse; font-size:.85rem; margin:8px 0 16px; }
+  th { text-align:left; color:var(--text2); font-weight:500; padding:8px 12px; border-bottom:1px solid var(--border); font-size:.75rem; text-transform:uppercase; letter-spacing:.5px; }
+  td { padding:8px 12px; border-bottom:1px solid var(--border); vertical-align:top; }
+  td code { background:var(--surface2); padding:2px 6px; border-radius:4px; font-family:'JetBrains Mono',monospace; font-size:.78rem; color:var(--accent2); }
+  tr:last-child td { border-bottom:none; }
+
+  .required { color:var(--red); font-size:.7rem; font-weight:600; }
+  .optional { color:var(--text2); font-size:.7rem; }
+  .divider { border:none; border-top:1px solid var(--border); margin:20px 0; }
+  .note { background:#eab30811; border:1px solid #eab30833; border-radius:8px; padding:12px 16px; font-size:.83rem; color:#eab308; margin:16px 0; }
+  .note::before { content:"⚠️ "; }
+  .info { background:#6366f111; border:1px solid #6366f133; border-radius:8px; padding:12px 16px; font-size:.83rem; color:var(--accent2); margin:16px 0; }
+  .success { background:#22c55e11; border:1px solid #22c55e33; border-radius:8px; padding:12px 16px; font-size:.83rem; color:#22c55e; margin:16px 0; }
+  .danger { background:#ef444411; border:1px solid #ef444433; border-radius:8px; padding:12px 16px; font-size:.83rem; color:#ef4444; margin:16px 0; }
+
+  /* Auth box */
+  .auth-box { background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:16px 20px; margin:12px 0; }
+  .auth-box code { color:var(--accent2); font-family:'JetBrains Mono',monospace; font-size:.85rem; }
+
+  /* Product table */
+  .product-table td:nth-child(3) { text-align:right; font-family:'JetBrains Mono',monospace; color:var(--green); }
+
+  h3.sub { font-size:.9rem; margin:20px 0 8px; color:var(--text2); }
+  h3.sub.green { color:var(--green); }
+  h3.sub.blue { color:var(--blue); }
+  h3.sub.red { color:var(--red); }
+  h3.sub.yellow { color:var(--yellow); }
+
+  .step-num { display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:50%; background:var(--accent); color:white; font-weight:700; font-size:.8rem; margin-right:8px; flex-shrink:0; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <h1>🤝 CTV API Documentation</h1>
+    <p>API cho CTV đấu bot — mua hàng tự động</p>
+    <span class="badge">v1.1 · Port 5000 · Base URL: http://103.69.87.202:5000</span>
+  </div>
+
+  <!-- Nav -->
+  <div class="nav">
+    <h3>Mục lục</h3>
+    <a href="#start">🚀 Bắt đầu sử dụng (5 bước)</a>
+    <a href="#auth">🔑 Xác thực (Authentication)</a>
+    <a href="#stock"><span class="method get">GET</span>/api/dealer/stock — Xem kho + giá + số dư</a>
+    <a href="#balance"><span class="method get">GET</span>/api/dealer/balance — Xem số dư</a>
+    <a href="#buy"><span class="method post">POST</span>/api/dealer/buy — Mua hàng</a>
+    <a href="#products">📦 Danh sách sản phẩm + product_key</a>
+    <a href="#errors">❌ Xử lý lỗi chi tiết</a>
+    <a href="#curl">🧪 Test nhanh bằng cURL</a>
+    <a href="#fullbot">🤖 Code mẫu bot Telegram hoàn chỉnh</a>
+    <a href="#faq">❓ Câu hỏi thường gặp / Troubleshooting</a>
+  </div>
+
+  <!-- Getting Started -->
+  <div class="section" id="start">
+    <h2>🚀 Bắt đầu sử dụng</h2>
+    <p class="desc">Làm theo 5 bước để đấu API vào bot của bạn.</p>
+
+    <table>
+      <tr><th>Bước</th><th>Mô tả</th></tr>
+      <tr><td><strong>1</strong></td><td>Mở bot <a href="https://t.me/longdt8386_bot" style="color:var(--accent2)">@longdt8386_bot</a> → gõ <code>/ctv</code> → nhận <strong>API key</strong> (dạng <code>DLR_XXXXX...</code>)</td></tr>
+      <tr><td><strong>2</strong></td><td>Nạp tiền vào bot bằng <code>/naptien</code> (chuyển khoản bình thường)</td></tr>
+      <tr><td><strong>3</strong></td><td>Gọi <code>GET /api/dealer/stock</code> để lấy danh sách sản phẩm, giá, tồn kho</td></tr>
+      <tr><td><strong>4</strong></td><td>Khi khách mua hàng trên bot của bạn → gọi <code>POST /api/dealer/buy</code> với <code>product_key</code> + <code>qty</code></td></tr>
+      <tr><td><strong>5</strong></td><td>API trả về <code>items</code> (tài khoản) → bạn gửi cho khách. Số dư tự động bị trừ</td></tr>
+    </table>
+
+    <div class="note">Bạn mua với giá sỉ, bán lại giá lẻ trên bot của bạn → hưởng chênh lệch. Khi hết số dư thì nạp thêm bằng <code>/naptien</code>.</div>
+
+    <div class="success">✅ Khi mua hàng thành công qua API, bot sẽ tự động gửi <strong>thông báo Telegram</strong> cho bạn với chi tiết đơn hàng + sản phẩm.</div>
+  </div>
+
+  <!-- Auth -->
+  <div class="section" id="auth">
+    <h2>🔑 Xác thực</h2>
+    <p class="desc">Mọi request đều <strong>BẮT BUỘC</strong> gửi kèm API key trong header. Không có header này → lỗi 401.</p>
+    <div class="auth-box">
+      <code>X-API-KEY: DLR_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX</code>
+    </div>
+    <p class="desc">Gõ <code>/ctv</code> trong bot Telegram để nhận API key. Nạp tiền bằng <code>/naptien</code>.</p>
+
+    <h3 class="sub red">🚫 Lỗi nếu thiếu / sai API key:</h3>
+<pre># Thiếu header → HTTP 401
+{"success": false, "error": "Thiếu header X-API-KEY"}
+
+# Key sai → HTTP 403
+{"success": false, "error": "API key không hợp lệ"}</pre>
+  </div>
+
+  <!-- GET /api/dealer/stock -->
+  <div class="section" id="stock">
+    <h2><span class="method-badge get">GET</span> <span class="endpoint">/api/dealer/stock</span></h2>
+    <p class="desc">Xem tồn kho, giá và số dư hiện tại. <strong>Gọi API này để hiển thị menu sản phẩm cho khách.</strong></p>
+
+    <h3 class="sub blue">📤 Request</h3>
+<pre>GET http://103.69.87.202:5000/api/dealer/stock
+X-API-KEY: DLR_xxxxx</pre>
+
+    <h3 class="sub green">📥 Response 200 — Thành công</h3>
+<pre>{
+  "success": true,
+  "dealer": "Nguyễn Văn A",
+  "balance": 500000,
+  "products": {
+    "gptplus_1thang_KBH": {
+      "name": "GPTPlus cá nhân (BH7D)",
+      "price": 7000,
+      "stock": 50,
+      "type": "file"
+    },
+    "slot_gpt_team": {
+      "name": "Slot ChatGPT Team Business",
+      "price": 10000,
+      "stock": 12,
+      "type": "virtual_invite",
+      "note": "Cần gửi kèm emails khi mua"
+    }
+  }
+}</pre>
+
+    <h3 class="sub">💻 Code Python mẫu</h3>
+<pre>import requests
+
+API_URL = "http://103.69.87.202:5000"
+API_KEY = "DLR_xxxxx"   # ← Thay bằng key thật
+
+def get_stock():
+    """Lấy danh sách sản phẩm + stock + giá."""
+    try:
+        r = requests.get(
+            f"{API_URL}/api/dealer/stock",
+            headers={"X-API-KEY": API_KEY},
+            timeout=10  # ← QUAN TRỌNG: luôn đặt timeout
+        )
+        data = r.json()
+
+        if data.get("success"):
+            balance = data["balance"]
+            products = data["products"]
+            print(f"Số dư: {balance:,}đ")
+            for key, info in products.items():
+                print(f"  {key}: {info['name']} | Giá: {info['price']:,}đ | Stock: {info['stock']}")
+            return products
+        else:
+            print(f"Lỗi: {data.get('error')}")
+            return None
+
+    except requests.exceptions.ConnectionError:
+        print("❌ Không kết nối được server! Kiểm tra lại URL hoặc server đang down")
+        return None
+    except requests.exceptions.Timeout:
+        print("❌ Server không phản hồi (timeout). Thử lại sau")
+        return None
+    except Exception as e:
+        print(f"❌ Lỗi không xác định: {e}")
+        return None</pre>
+
+    <div class="info">💡 <strong>Tip:</strong> Nên cache kết quả stock trong 30-60 giây, không cần gọi API mỗi lần khách xem menu.</div>
+
+    <div class="success">
+      📊 <strong>Về stock của <code>slot_gpt_team</code>:</strong><br>
+      • <code>stock > 0</code> → còn slot, mua được<br>
+      • <code>stock = 0</code> → hết slot, chờ bổ sung<br>
+      • <code>stock = -1</code> → hệ thống đang cập nhật, gọi lại sau 1 phút<br>
+      Hệ thống tự cập nhật mỗi 60 giây. Chỉ tính tiền email mời <strong>thành công</strong>.
+    </div>
+  </div>
+
+  <!-- GET /api/dealer/balance -->
+  <div class="section" id="balance">
+    <h2><span class="method-badge get">GET</span> <span class="endpoint">/api/dealer/balance</span></h2>
+    <p class="desc">Xem số dư CTV (cùng ví <code>/sodu</code>).</p>
+
+    <h3 class="sub blue">📤 Request</h3>
+<pre>GET http://103.69.87.202:5000/api/dealer/balance
+X-API-KEY: DLR_xxxxx</pre>
+
+    <h3 class="sub green">📥 Response 200</h3>
+<pre>{
+  "success": true,
+  "dealer": "Nguyễn Văn A",
+  "balance": 500000
+}</pre>
+
+    <h3 class="sub">💻 Code Python mẫu</h3>
+<pre>def get_balance():
+    """Xem số dư hiện tại."""
+    try:
+        r = requests.get(
+            f"{API_URL}/api/dealer/balance",
+            headers={"X-API-KEY": API_KEY},
+            timeout=10
+        )
+        data = r.json()
+        if data.get("success"):
+            return data["balance"]
+        return 0
+    except Exception as e:
+        print(f"Lỗi check số dư: {e}")
+        return 0</pre>
+  </div>
+
+  <!-- POST /api/dealer/buy -->
+  <div class="section" id="buy">
+    <h2><span class="method-badge post">POST</span> <span class="endpoint">/api/dealer/buy</span></h2>
+    <p class="desc">Mua hàng — tự động trừ số dư, trả items. <strong>Đây là API chính.</strong></p>
+
+    <h3 class="sub">📌 Body Parameters (JSON)</h3>
+    <table>
+      <tr><th>Param</th><th>Type</th><th>Mô tả</th></tr>
+      <tr><td><code>product_key</code></td><td>string <span class="required">BẮT BUỘC</span></td><td>Mã sản phẩm (xem bảng bên dưới, ví dụ: <code>"gptplus_1thang_KBH"</code>)</td></tr>
+      <tr><td><code>qty</code></td><td>int <span class="required">BẮT BUỘC</span></td><td>Số lượng mua (1-100)</td></tr>
+      <tr><td><code>emails</code></td><td>list <span class="optional">CHỈ slot_gpt_team</span></td><td>Danh sách email cần mời. Số email phải = qty</td></tr>
+      <tr><td><code>order_code</code></td><td>string <span class="optional">TÙY CHỌN</span></td><td>Mã đơn tùy chỉnh (tự tạo nếu không gửi)</td></tr>
+    </table>
+
+    <div class="note"><strong>Header bắt buộc:</strong> <code>Content-Type: application/json</code> — Nếu thiếu sẽ không đọc được body!</div>
+
+    <hr class="divider">
+
+    <h3 class="sub green">✅ Ví dụ 1 — Mua sản phẩm thường (file stock)</h3>
+    <p class="label req">Request</p>
+<pre>POST http://103.69.87.202:5000/api/dealer/buy
+X-API-KEY: DLR_xxxxx
+Content-Type: application/json
+
+{"product_key": "gptplus_1thang_KBH", "qty": 2}</pre>
+
+    <p class="label res">Response 200 — Thành công</p>
+<pre>{
+  "success": true,
+  "product": "gptplus_1thang_KBH",
+  "items": [
+    "email1@example.com|password1|2FA_SECRET1",
+    "email2@example.com|password2|2FA_SECRET2"
+  ],
+  "qty": 2,
+  "total_charged": 14000,
+  "balance_remaining": 486000,
+  "order_code": "CTV-GPT-1903-143022-A7X"
+}</pre>
+
+    <h3 class="sub">💻 Code Python mẫu — Mua sản phẩm thường</h3>
+<pre>def buy_product(product_key, qty):
+    """Mua sản phẩm thường (GPTPlus, CapCut, v.v.)."""
+    try:
+        r = requests.post(
+            f"{API_URL}/api/dealer/buy",
+            headers={
+                "X-API-KEY": API_KEY,
+                "Content-Type": "application/json"   # ← BẮT BUỘC
+            },
+            json={
+                "product_key": product_key,
+                "qty": qty
+            },
+            timeout=30
+        )
+        data = r.json()
+
+        if data.get("success"):
+            items = data["items"]          # ← Danh sách tài khoản
+            charged = data["total_charged"]
+            remaining = data["balance_remaining"]
+            order_code = data["order_code"]
+            print(f"✅ Mua thành công {qty}x {product_key}")
+            print(f"   Trừ: {charged:,}đ | Còn: {remaining:,}đ")
+            print(f"   Mã đơn: {order_code}")
+            for item in items:
+                print(f"   → {item}")
+            return items
+        else:
+            error = data.get("error", "Lỗi không xác định")
+            print(f"❌ Mua thất bại: {error}")
+            return None
+
+    except requests.exceptions.ConnectionError:
+        print("❌ Không kết nối được server!")
+        return None
+    except requests.exceptions.Timeout:
+        print("❌ Timeout — server không phản hồi")
+        return None
+    except Exception as e:
+        print(f"❌ Lỗi: {e}")
+        return None
+
+# Sử dụng:
+items = buy_product("gptplus_1thang_KBH", 2)
+if items:
+    # Gửi items cho khách hàng của bạn
+    for item in items:
+        print(f"Gửi cho khách: {item}")</pre>
+
+    <hr class="divider">
+
+    <h3 class="sub blue">⚡ Ví dụ 2 — Mua slot_gpt_team (cần email)</h3>
+    <p class="label req">Request</p>
+<pre>POST http://103.69.87.202:5000/api/dealer/buy
+X-API-KEY: DLR_xxxxx
+Content-Type: application/json
+
+{
+  "product_key": "slot_gpt_team",
+  "qty": 2,
+  "emails": ["user1@gmail.com", "user2@gmail.com"]
+}</pre>
+
+    <p class="label res">Response 200 — Thành công</p>
+<pre>{
+  "success": true,
+  "product": "slot_gpt_team",
+  "items": ["user1@gmail.com", "user2@gmail.com"],
+  "team_name": "GPT Team Business-05",
+  "total_charged": 20000,
+  "balance_remaining": 480000,
+  "order_code": "CTV-TEAM-1903-143055-B2K"
+}</pre>
+
+    <h3 class="sub">💻 Code Python mẫu — Mua slot_gpt_team</h3>
+<pre>def buy_slot_gpt_team(emails):
+    """Mua slot GPT Team — cần truyền danh sách email."""
+    try:
+        r = requests.post(
+            f"{API_URL}/api/dealer/buy",
+            headers={
+                "X-API-KEY": API_KEY,
+                "Content-Type": "application/json"
+            },
+            json={
+                "product_key": "slot_gpt_team",
+                "qty": len(emails),           # ← qty = số email
+                "emails": emails              # ← Danh sách email
+            },
+            timeout=180  # ← Timeout lớn vì invite có thể mất 1-2 phút
+        )
+        data = r.json()
+
+        if data.get("success"):
+            invited = data["items"]
+            team = data.get("team_name", "N/A")
+            print(f"✅ Mời thành công {len(invited)} email vào team {team}")
+            return invited
+        else:
+            print(f"❌ Lỗi: {data.get('error')}")
+            return None
+
+    except requests.exceptions.Timeout:
+        print("❌ Timeout — invite mất quá lâu, thử với ít email hơn")
+        return None
+    except Exception as e:
+        print(f"❌ Lỗi: {e}")
+        return None
+
+# Sử dụng:
+result = buy_slot_gpt_team(["abc@gmail.com", "xyz@gmail.com"])</pre>
+
+    <div class="note">Với <code>slot_gpt_team</code>: chỉ tính tiền cho email mời <strong>thành công</strong>. Email bị lỗi/trùng sẽ không bị trừ tiền. Timeout nên đặt <strong>180 giây</strong> vì quá trình invite có thể mất thời gian.</div>
+  </div>
+
+  <!-- Products -->
+  <div class="section" id="products">
+    <h2>📦 Danh sách sản phẩm</h2>
+    <p class="desc">Sử dụng <code>product_key</code> chính xác khi gọi API mua hàng. <strong>Sai 1 ký tự = lỗi 404!</strong></p>
+    <table class="product-table">
+      <tr><th>product_key</th><th>Tên</th><th>Giá CTV (VNĐ)</th></tr>
+      <tr><td><code>gptplus_1thang_KBH</code></td><td>GPTPlus cá nhân (BH7D)</td><td>5,000</td></tr>
+      <tr><td><code>gptplus_1thang_BHF</code></td><td>GPTPlus cá nhân (BHF)</td><td>10,000</td></tr>
+      <tr><td><code>slot_gpt_team</code></td><td>Slot ChatGPT Team Business ⚡</td><td>10,000</td></tr>
+      <tr><td><code>admingpt_bh</code></td><td>AdminGPT-Team 7 Slot (BHF)</td><td>40,000</td></tr>
+      <tr><td><code>admingpt_kbh</code></td><td>AdminGPT-Team 7 Slot (KBH)</td><td>15,000</td></tr>
+      <tr><td><code>canvaedu</code></td><td>AdminCanvaEDU (3 năm–500 slot)</td><td>30,000</td></tr>
+      <tr><td><code>cc1thang</code></td><td>CapcutPro 35 ngày</td><td>15,000</td></tr>
+      <tr><td><code>cc3thang_renew</code></td><td>Capcut 3Th Renew</td><td>60,000</td></tr>
+      <tr><td><code>cc6thang_renew</code></td><td>Capcut 6Th Renew</td><td>100,000</td></tr>
+      <tr><td><code>cc1nam</code></td><td>CapcutPro 1 năm (BHF)</td><td>250,000</td></tr>
+      <tr><td><code>cdkgpt_kbh</code></td><td>Gia hạn GPTPlus 1 tháng (CDK-KBH)</td><td>50,000</td></tr>
+      <tr><td><code>supergrok_1thang_bhf</code></td><td>Super Grok 1 tháng (BHF)</td><td>120,000</td></tr>
+      <tr><td><code>supergrok_1nam_bhf</code></td><td>Super Grok 1 năm (BHF)</td><td>999,000</td></tr>
+      <tr><td><code>geminipro_pixel</code></td><td>GeminiPro Pixel 1 năm</td><td>60,000</td></tr>
+      <tr><td><code>suftvpn_3thang</code></td><td>CODE SuftShark VPN 3 tháng</td><td>100,000</td></tr>
+      <tr><td><code>netflix_1month</code></td><td>Cookie Netflix 1M (PC/iOS)</td><td>40,000</td></tr>
+      <tr><td><code>discord_nitro_3m</code></td><td>Discord Nitro Trial 3 Tháng (BHF)</td><td>40,000</td></tr>
+      <tr><td><code>key_hma_30d</code></td><td>Key HMA Android/PC 20-30 Ngày</td><td>10,000</td></tr>
+      <tr><td><code>meitu_svip_1m</code></td><td>Meitu SVIP 1 Tháng (BHF)</td><td>70,000</td></tr>
+    </table>
+    <div class="info">⚡ <code>slot_gpt_team</code> cần gửi kèm <code>emails</code> trong body khi mua. Các sản phẩm khác chỉ cần <code>product_key</code> + <code>qty</code>.</div>
+    <div class="note">Giá có thể thay đổi. Luôn lấy giá từ API <code>/api/dealer/stock</code> thay vì hard-code vào bot!</div>
+  </div>
+
+  <!-- Errors -->
+  <div class="section" id="errors">
+    <h2>❌ Xử lý lỗi chi tiết</h2>
+    <p class="desc">Khi <code>success: false</code>, field <code>error</code> sẽ chứa mô tả lỗi. Luôn kiểm tra field <code>success</code> trước!</p>
+    <table>
+      <tr><th>HTTP</th><th>Error</th><th>Nguyên nhân</th><th>Cách xử lý</th></tr>
+      <tr><td>401</td><td>Thiếu header X-API-KEY</td><td>Không gửi API key</td><td>Thêm <code>X-API-KEY</code> vào header</td></tr>
+      <tr><td>403</td><td>API key không hợp lệ</td><td>Key sai hoặc đã bị xóa</td><td>Kiểm tra lại key, gõ <code>/ctv</code> lấy key mới</td></tr>
+      <tr><td>400</td><td>Thiếu product_key</td><td>Không gửi mã sản phẩm</td><td>Thêm <code>product_key</code> vào body JSON</td></tr>
+      <tr><td>400</td><td>Số lượng không hợp lệ</td><td>qty ≤ 0 hoặc > 100</td><td>qty phải từ 1 đến 100</td></tr>
+      <tr><td>400</td><td>Body JSON không hợp lệ</td><td>Body không phải JSON hợp lệ</td><td>Thêm header <code>Content-Type: application/json</code></td></tr>
+      <tr><td>404</td><td>Sản phẩm không tồn tại</td><td>product_key sai</td><td>Kiểm tra bảng product_key ở trên</td></tr>
+      <tr><td>200</td><td>Không đủ số dư</td><td>Hết tiền</td><td>Nạp thêm bằng <code>/naptien</code></td></tr>
+      <tr><td>200</td><td>Không đủ hàng</td><td>Kho hết</td><td>Giảm qty hoặc chờ nhập hàng</td></tr>
+      <tr><td>200</td><td>Đơn hàng đã xử lý rồi</td><td>Trùng order_code</td><td>Dùng order_code khác hoặc bỏ trống</td></tr>
+    </table>
+
+    <h3 class="sub">💻 Code xử lý lỗi mẫu</h3>
+<pre>def safe_buy(product_key, qty, emails=None):
+    """Mua hàng với xử lý lỗi đầy đủ."""
+    try:
+        body = {"product_key": product_key, "qty": qty}
+        if emails:
+            body["emails"] = emails
+
+        r = requests.post(
+            f"{API_URL}/api/dealer/buy",
+            headers={
+                "X-API-KEY": API_KEY,
+                "Content-Type": "application/json"
+            },
+            json=body,
+            timeout=180 if product_key == "slot_gpt_team" else 30
+        )
+
+        # Kiểm tra HTTP status trước
+        if r.status_code == 401:
+            return None, "Thiếu API key! Kiểm tra header X-API-KEY"
+        elif r.status_code == 403:
+            return None, "API key sai! Gõ /ctv lấy key mới"
+        elif r.status_code == 404:
+            return None, f"Sản phẩm '{product_key}' không tồn tại"
+
+        data = r.json()
+
+        if data.get("success"):
+            return data["items"], None   # ← Thành công
+        else:
+            return None, data.get("error", "Lỗi không rõ")
+
+    except requests.exceptions.ConnectionError:
+        return None, "Không kết nối được server (server down hoặc sai URL)"
+    except requests.exceptions.Timeout:
+        return None, "Server không phản hồi (timeout)"
+    except ValueError:
+        return None, "Server trả về dữ liệu không hợp lệ (không phải JSON)"
+    except Exception as e:
+        return None, f"Lỗi: {str(e)}"
+
+# Sử dụng:
+items, error = safe_buy("gptplus_1thang_KBH", 1)
+if error:
+    print(f"❌ {error}")
+    # → Thông báo lỗi cho khách
+else:
+    print(f"✅ Mua thành công!")
+    for item in items:
+        print(f"  → {item}")
+    # → Gửi items cho khách</pre>
+  </div>
+
+  <!-- cURL test -->
+  <div class="section" id="curl">
+    <h2>🧪 Test nhanh bằng cURL</h2>
+    <p class="desc">Copy & paste vào Terminal/CMD để test API trước khi code.</p>
+
+    <h3 class="sub green">1. Test xem stock</h3>
+<pre>curl -H "X-API-KEY: DLR_xxxxx" http://103.69.87.202:5000/api/dealer/stock</pre>
+
+    <h3 class="sub green">2. Test xem số dư</h3>
+<pre>curl -H "X-API-KEY: DLR_xxxxx" http://103.69.87.202:5000/api/dealer/balance</pre>
+
+    <h3 class="sub blue">3. Test mua 1 GPTPlus</h3>
+<pre>curl -X POST http://103.69.87.202:5000/api/dealer/buy \
+  -H "X-API-KEY: DLR_xxxxx" \
+  -H "Content-Type: application/json" \
+  -d '{"product_key": "gptplus_1thang_KBH", "qty": 1}'</pre>
+
+    <h3 class="sub blue">4. Test mua slot_gpt_team</h3>
+<pre>curl -X POST http://103.69.87.202:5000/api/dealer/buy \
+  -H "X-API-KEY: DLR_xxxxx" \
+  -H "Content-Type: application/json" \
+  -d '{"product_key": "slot_gpt_team", "qty": 1, "emails": ["test@gmail.com"]}'</pre>
+
+    <div class="info">💡 Trên Windows thay <code>\</code> bằng <code>^</code> hoặc gộp thành 1 dòng.</div>
+  </div>
+
+  <!-- Full bot example -->
+  <div class="section" id="fullbot">
+    <h2>🤖 Code mẫu bot Telegram hoàn chỉnh</h2>
+    <p class="desc">Ví dụ tích hợp vào bot Telegram Python (python-telegram-bot).</p>
+
+<pre>import requests
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, ContextTypes
+
+# ============================
+# CẤU HÌNH — THAY ĐỔI Ở ĐÂY
+# ============================
+BOT_TOKEN = "YOUR_BOT_TOKEN"
+API_URL = "http://103.69.87.202:5000"
+API_KEY = "DLR_xxxxx"  # ← Key từ /ctv
+
+HEADERS = {
+    "X-API-KEY": API_KEY,
+    "Content-Type": "application/json"
+}
+
+# ============================
+# HÀM GỌI API
+# ============================
+def api_get_stock():
+    """Lấy danh sách sản phẩm từ API đối tác."""
+    try:
+        r = requests.get(
+            f"{API_URL}/api/dealer/stock",
+            headers={"X-API-KEY": API_KEY},
+            timeout=10
+        )
+        data = r.json()
+        if data.get("success"):
+            return data["products"], data["balance"]
+        return None, 0
+    except Exception as e:
+        print(f"ERROR - Lỗi lấy stock API đối tác: {e}")
+        return None, 0
+
+def api_buy(product_key, qty, emails=None):
+    """Mua hàng từ API đối tác."""
+    try:
+        body = {"product_key": product_key, "qty": qty}
+        if emails:
+            body["emails"] = emails
+
+        r = requests.post(
+            f"{API_URL}/api/dealer/buy",
+            headers=HEADERS,
+            json=body,
+            timeout=180 if product_key == "slot_gpt_team" else 30
+        )
+        return r.json()
+    except requests.exceptions.ConnectionError:
+        return {"success": False, "error": "Không kết nối được server đối tác"}
+    except requests.exceptions.Timeout:
+        return {"success": False, "error": "Timeout - server đối tác không phản hồi"}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+# ============================
+# HANDLER BOT TELEGRAM
+# ============================
+async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Hiển thị menu sản phẩm."""
+    products, balance = api_get_stock()
+    if products is None:
+        await update.message.reply_text("❌ Server đối tác đang bận, thử lại sau!")
+        return
+
+    buttons = []
+    for key, info in products.items():
+        stock = info["stock"]
+        if stock == 0:
+            status = "❌ Hết hàng"
+        elif stock == -1:
+            status = "🔄 Đang cập nhật"
+        else:
+            status = f"✅ Còn {stock}"
+
+        buttons.append([InlineKeyboardButton(
+            f"{info['name']} | {info['price']:,}đ | {status}",
+            callback_data=f"buy_{key}"
+        )])
+
+    await update.message.reply_text(
+        f"🛒 *Menu sản phẩm*\n💰 Số dư: *{balance:,}đ*",
+        parse_mode="Markdown",
+        reply_markup=InlineKeyboardMarkup(buttons)
+    )
+
+async def handle_buy(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Xử lý khi khách nhấn mua."""
+    query = update.callback_query
+    await query.answer()
+
+    product_key = query.data.replace("buy_", "")
+
+    # Mua 1 sản phẩm
+    result = api_buy(product_key, 1)
+
+    if result.get("success"):
+        items = result["items"]
+        charged = result["total_charged"]
+        items_text = "\n".join([f"• `{item}`" for item in items])
+        await query.edit_message_text(
+            f"✅ *Mua thành công!*\n\n"
+            f"📦 Sản phẩm:\n{items_text}\n\n"
+            f"💰 Đã trừ: *{charged:,}đ*",
+            parse_mode="Markdown"
+        )
+    else:
+        await query.edit_message_text(
+            f"❌ *Lỗi:* {result.get('error', 'Không rõ')}"
+        )
+
+# ============================
+# CHẠY BOT
+# ============================
+app = ApplicationBuilder().token(BOT_TOKEN).build()
+app.add_handler(CommandHandler("menu", menu))
+app.add_handler(CallbackQueryHandler(handle_buy, pattern="^buy_"))
+app.run_polling()</pre>
+
+    <div class="success">✅ Copy code trên → thay <code>BOT_TOKEN</code> và <code>API_KEY</code> → chạy là có bot bán hàng tự động!</div>
+  </div>
+
+  <!-- FAQ -->
+  <div class="section" id="faq">
+    <h2>❓ Câu hỏi thường gặp / Xử lý sự cố</h2>
+
+    <h3 class="sub red">🔴 "Không kết nối được server" / ConnectionError</h3>
+    <p class="desc">
+      <strong>Nguyên nhân:</strong> Server đang down hoặc firewall chặn port 5000.<br>
+      <strong>Cách kiểm tra:</strong> Mở trình duyệt → vào <code>http://103.69.87.202:5000/api/dealer/stock</code> (sẽ trả lỗi 401 nhưng nghĩa là server đang chạy).<br>
+      <strong>Xử lý:</strong> Liên hệ admin (Telegram: @longdt8386) để kiểm tra server.
+    </p>
+
+    <hr class="divider">
+
+    <h3 class="sub red">🔴 "Body JSON không hợp lệ" khi POST /buy</h3>
+    <p class="desc">
+      <strong>Nguyên nhân:</strong> Thiếu header <code>Content-Type: application/json</code>.<br>
+      <strong>Xử lý:</strong> Luôn gửi kèm header:
+    </p>
+<pre>headers = {
+    "X-API-KEY": "DLR_xxxxx",
+    "Content-Type": "application/json"   # ← QUAN TRỌNG!
+}</pre>
+
+    <hr class="divider">
+
+    <h3 class="sub red">🔴 stock = -1 cho slot_gpt_team</h3>
+    <p class="desc">
+      <strong>Nguyên nhân:</strong> Hệ thống đang cập nhật slot (tự động mỗi 60 giây).<br>
+      <strong>Xử lý:</strong> Chờ 60 giây rồi gọi lại <code>/api/dealer/stock</code>. <strong>KHÔNG</strong> hiển thị "hết hàng" cho khách khi stock = -1!
+    </p>
+<pre># Xử lý stock = -1 đúng cách:
+stock = products["slot_gpt_team"]["stock"]
+if stock > 0:
+    print(f"Còn {stock} slot")
+elif stock == 0:
+    print("Hết slot — chờ bổ sung")
+elif stock == -1:
+    print("Đang cập nhật — thử lại sau 1 phút")
+    # → KHÔNG hiển thị "hết hàng"!</pre>
+
+    <hr class="divider">
+
+    <h3 class="sub red">🔴 Timeout khi mua slot_gpt_team</h3>
+    <p class="desc">
+      <strong>Nguyên nhân:</strong> Invite email mất 1-3 phút, đặc biệt khi nhiều email.<br>
+      <strong>Xử lý:</strong> Đặt <code>timeout=180</code> (3 phút) cho slot_gpt_team. Các sản phẩm khác dùng <code>timeout=30</code> là đủ.
+    </p>
+
+    <hr class="divider">
+
+    <h3 class="sub yellow">🟡 Nên gọi API bao lâu 1 lần?</h3>
+    <p class="desc">
+      • <code>/api/dealer/stock</code>: Cache 30-60 giây, không gọi mỗi lần khách xem menu<br>
+      • <code>/api/dealer/buy</code>: Gọi ngay khi khách xác nhận mua<br>
+      • <code>/api/dealer/balance</code>: Gọi khi cần, không giới hạn
+    </p>
+
+    <hr class="divider">
+
+    <h3 class="sub yellow">🟡 Liên hệ hỗ trợ</h3>
+    <p class="desc">
+      Telegram: <a href="https://t.me/longdt8386" style="color:var(--accent2)">@longdt8386</a><br>
+      Zalo: 0948999915
+    </p>
+  </div>
+
+</div>
+</body>
+</html>

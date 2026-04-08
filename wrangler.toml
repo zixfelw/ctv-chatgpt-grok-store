@@ -1,0 +1,18 @@
+# Cloudflare Worker Config
+# Docs: https://developers.cloudflare.com/workers/wrangler/configuration/
+
+name = "ctv-api-proxy"
+main = "worker.js"
+compatibility_date = "2024-01-01"
+
+# ============================================
+# BIẾN MÔI TRƯỜNG — THAY ĐỔI Ở ĐÂY
+# ============================================
+[vars]
+API_BASE = "http://103.69.87.202:5000"
+
+# ============================================
+# SECRET — Đặt qua CLI (không lưu trong file)
+# ============================================
+# Chạy lệnh: npx wrangler secret put API_KEY
+# Rồi nhập: DLR_xxxxx (key CTV của bạn)
