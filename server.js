@@ -7,26 +7,9 @@ const API_BASE = process.env.API_BASE || 'http://103.69.87.202:5000';
 const API_KEY = process.env.API_KEY || '';
 const PASS_KEY = process.env.PASS_KEY || process.env['pass-key'] || '';
 
-const ALLOWED_PRODUCTS = [
-  'gptplus_1thang_KBH',
-  'gptplus_1thang_BHF',
-  'slot_gpt_team',
-  'admingpt_bh',
-  'admingpt_kbh',
-  'cdkgpt_kbh',
-  'supergrok_1thang_bhf',
-  'supergrok_1nam_bhf',
-];
-
 app.disable('x-powered-by');
 app.use(express.json({ limit: '1mb' }));
 app.use(express.static(__dirname));
-
-function filterProducts(products = {}) {
-  return Object.fromEntries(
-    Object.entries(products).filter(([key]) => ALLOWED_PRODUCTS.includes(key))
-  );
-}
 
 async function apiRequest(endpoint, options = {}) {
   if (!API_KEY) {
@@ -81,8 +64,6 @@ app.get('/api/stock', async (req, res) => {
     return res.status(stockResult.status).json(stockResult.data);
   }
 
-  const filteredProducts = filterProducts(stockResult.data.products);
-
   let balance;
   let dealer;
   const balanceResult = await apiRequest('/api/dealer/balance');
@@ -93,7 +74,7 @@ app.get('/api/stock', async (req, res) => {
 
   return res.json({
     ...stockResult.data,
-    products: filteredProducts,
+    products: stockResult.data.products || {},
     balance,
     dealer,
   });
@@ -106,7 +87,7 @@ app.post('/api/buy', async (req, res) => {
     return res.status(403).json({ success: false, error: 'Pass-key không đúng.' });
   }
 
-  if (!body.product_key || !ALLOWED_PRODUCTS.includes(body.product_key)) {
+  if (!body.product_key || typeof body.product_key !== 'string') {
     return res.status(400).json({ success: false, error: 'Sản phẩm không hợp lệ.' });
   }
 

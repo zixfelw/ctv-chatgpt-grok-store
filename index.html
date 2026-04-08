@@ -932,9 +932,10 @@
   <!-- ===== CATEGORY TABS ===== -->
   <div class="categories">
     <button class="cat-btn active" onclick="filterCategory('all', this)">🛍️ Tất cả</button>
-    <button class="cat-btn" onclick="filterCategory('gpt', this)">💚 ChatGPT</button>
-    <button class="cat-btn" onclick="filterCategory('grok', this)">🟠 Grok</button>
-    <button class="cat-btn" onclick="filterCategory('team', this)">💙 Team / Admin</button>
+    <button class="cat-btn" onclick="filterCategory('ai', this)">🤖 AI Tools</button>
+    <button class="cat-btn" onclick="filterCategory('media', this)">🎬 Media / Design</button>
+    <button class="cat-btn" onclick="filterCategory('utility', this)">🧰 Utility / Khác</button>
+    <button class="cat-btn" onclick="filterCategory('team', this)">👥 Team / Admin</button>
   </div>
 
   <!-- ===== PRODUCTS ===== -->
@@ -1013,17 +1014,85 @@ let productsData = {};
 let currentFilter = 'all';
 let selectedProduct = null;
 
-// Product metadata for display
-const PRODUCT_META = {
-  gptplus_1thang_KBH: { cat: 'gpt', icon: '💚', type: 'gpt', tag: 'KBH', tagClass: 'kbh', desc: 'Tài khoản ChatGPT Plus cá nhân, bảo hành 7 ngày.' },
-  gptplus_1thang_BHF: { cat: 'gpt', icon: '💚', type: 'gpt', tag: 'BHF', tagClass: 'bhf', desc: 'Tài khoản ChatGPT Plus cá nhân, bảo hành full (thay mới nếu die).' },
-  slot_gpt_team:      { cat: 'team', icon: '💙', type: 'team', tag: 'TEAM', tagClass: 'special', desc: 'Slot ChatGPT Team Business — cần gửi email khi mua.' },
-  admingpt_bh:        { cat: 'team', icon: '💙', type: 'team', tag: 'BHF', tagClass: 'bhf', desc: 'Admin GPT Team 7 Slot — bảo hành full.' },
-  admingpt_kbh:       { cat: 'team', icon: '💙', type: 'team', tag: 'KBH', tagClass: 'kbh', desc: 'Admin GPT Team 7 Slot — không bảo hành.' },
-  cdkgpt_kbh:         { cat: 'gpt', icon: '💚', type: 'gpt', tag: 'CDK', tagClass: 'special', desc: 'Code gia hạn GPT Plus 1 tháng — dùng CDK.' },
-  supergrok_1thang_bhf: { cat: 'grok', icon: '🟠', type: 'grok', tag: 'BHF', tagClass: 'bhf', desc: 'Super Grok 1 tháng — trọn bộ tính năng, bảo hành full.' },
-  supergrok_1nam_bhf: { cat: 'grok', icon: '🟠', type: 'grok', tag: 'BHF', tagClass: 'bhf', desc: 'Super Grok 1 năm — siêu tiết kiệm, bảo hành full.' },
+// Category and display metadata
+const CATEGORY_META = {
+  all: { label: 'Tất cả', icon: '🛍️' },
+  ai: { label: 'AI Tools', icon: '🤖' },
+  media: { label: 'Media / Design', icon: '🎬' },
+  utility: { label: 'Utility / Khác', icon: '🧰' },
+  team: { label: 'Team / Admin', icon: '👥' },
 };
+
+const PRODUCT_META_OVERRIDES = {
+  slot_gpt_team: { tag: 'TEAM', tagClass: 'special', desc: 'Cần gửi email khi mua để hệ thống mời vào team.' },
+  admingpt_bh: { tag: 'BHF', tagClass: 'bhf', desc: 'Tài khoản admin/team với chế độ bảo hành full.' },
+  admingpt_kbh: { tag: 'KBH', tagClass: 'kbh', desc: 'Tài khoản admin/team giá tối ưu, không bảo hành.' },
+  gptplus_1thang_KBH: { tag: 'KBH', tagClass: 'kbh' },
+  gptplus_1thang_BHF: { tag: 'BHF', tagClass: 'bhf' },
+  cdkgpt_kbh: { tag: 'CDK', tagClass: 'special' },
+  supergrok_1thang_bhf: { tag: 'BHF', tagClass: 'bhf' },
+  supergrok_1nam_bhf: { tag: 'BHF', tagClass: 'bhf' },
+};
+
+function inferCategory(productKey = '', productName = '') {
+  const hay = `${productKey} ${productName}`.toLowerCase();
+  if (hay.includes('team') || hay.includes('admin')) return 'team';
+  if (
+    hay.includes('gpt') || hay.includes('grok') || hay.includes('gemini') ||
+    hay.includes('claude') || hay.includes('ai')
+  ) return 'ai';
+  if (
+    hay.includes('canva') || hay.includes('capcut') || hay.includes('netflix') ||
+    hay.includes('discord') || hay.includes('meitu')
+  ) return 'media';
+  return 'utility';
+}
+
+function inferProductMeta(productKey, product) {
+  const category = inferCategory(productKey, product?.name || '');
+  const lower = `${productKey} ${product?.name || ''}`.toLowerCase();
+
+  let type = 'gpt';
+  let icon = '📦';
+  if (category === 'team') {
+    type = 'team';
+    icon = '👥';
+  } else if (lower.includes('grok')) {
+    type = 'grok';
+    icon = '🟠';
+  } else if (category === 'media') {
+    type = 'grok';
+    icon = '🎬';
+  } else if (category === 'utility') {
+    type = 'team';
+    icon = '🧰';
+  } else {
+    type = 'gpt';
+    icon = lower.includes('gemini') ? '💎' : '🤖';
+  }
+
+  let tag = CATEGORY_META[category]?.label || 'SẢN PHẨM';
+  let tagClass = category === 'team' ? 'special' : 'bhf';
+
+  if (lower.includes('bhf')) {
+    tag = 'BHF';
+    tagClass = 'bhf';
+  } else if (lower.includes('kbh')) {
+    tag = 'KBH';
+    tagClass = 'kbh';
+  }
+
+  return {
+    cat: category,
+    icon,
+    type,
+    tag,
+    tagClass,
+    desc: product?.note || `Mã: ${productKey}`,
+    ...(PRODUCT_META_OVERRIDES[productKey] || {}),
+  };
+}
+
 
 // ============================================
 // INIT
@@ -1103,17 +1172,15 @@ function renderProducts() {
       <div class="error-state">
         <div class="icon">📦</div>
         <h3>Không có sản phẩm nào</h3>
-        <p>Kho hàng đang trống hoặc chưa có sản phẩm Grok/ChatGPT.</p>
+        <p>Kho hàng đang trống hoặc API chưa trả về mặt hàng nào.</p>
       </div>
     `;
     return;
   }
 
-  const filtered = entries.filter(([key]) => {
+  const filtered = entries.filter(([key, product]) => {
     if (currentFilter === 'all') return true;
-    const meta = PRODUCT_META[key];
-    if (!meta) return false;
-    return meta.cat === currentFilter;
+    return inferCategory(key, product?.name || '') === currentFilter;
   });
 
   if (filtered.length === 0) {
@@ -1121,7 +1188,7 @@ function renderProducts() {
       <div class="error-state">
         <div class="icon">🔍</div>
         <h3>Không có sản phẩm trong danh mục này</h3>
-        <p>Thử chọn danh mục khác.</p>
+        <p>Thử chọn danh mục khác hoặc bấm làm mới để tải kho mới nhất.</p>
       </div>
     `;
     return;
@@ -1130,7 +1197,7 @@ function renderProducts() {
   let html = '<div class="products-grid">';
 
   for (const [key, product] of filtered) {
-    const meta = PRODUCT_META[key] || { cat: 'gpt', icon: '📦', type: 'gpt', tag: '—', tagClass: 'special', desc: product.name };
+    const meta = inferProductMeta(key, product);
     const stock = product.stock;
     let stockClass, stockText;
 
