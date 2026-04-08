@@ -978,6 +978,11 @@
       <textarea id="modalEmails" placeholder="user1@gmail.com&#10;user2@gmail.com"></textarea>
       <div class="hint">Số email phải bằng số lượng. Chỉ áp dụng cho Slot GPT Team.</div>
     </div>
+    <div class="form-group">
+      <label>Pass-key xác nhận mua hàng</label>
+      <input type="password" id="modalPassKey" placeholder="Nhập pass-key để xác nhận mua">
+      <div class="hint">Bắt buộc nhập pass-key trước khi hệ thống xử lý đơn.</div>
+    </div>
     <div class="total-row">
       <span class="total-label">Tổng cộng</span>
       <span class="total-value" id="modalTotal">0đ</span>
@@ -1072,8 +1077,8 @@ async function loadStock() {
   }
 }
 
-async function buyProduct(productKey, qty, emails) {
-  const body = { product_key: productKey, qty };
+async function buyProduct(productKey, qty, emails, passKey) {
+  const body = { product_key: productKey, qty, pass_key: passKey };
   if (emails && emails.length > 0) {
     body.emails = emails;
   }
@@ -1196,6 +1201,7 @@ function openBuyModal(productKey) {
   const emailGroup = document.getElementById('emailGroup');
   emailGroup.style.display = productKey === 'slot_gpt_team' ? 'block' : 'none';
   document.getElementById('modalEmails').value = '';
+  document.getElementById('modalPassKey').value = '';
 
   updateTotal();
   document.getElementById('orderModal').classList.add('show');
@@ -1220,7 +1226,13 @@ async function confirmBuy() {
   if (!selectedProduct) return;
 
   const qty = parseInt(document.getElementById('modalQty').value) || 1;
+  const passKey = document.getElementById('modalPassKey').value.trim();
   let emails = null;
+
+  if (!passKey) {
+    showToast('Vui lòng nhập pass-key!', 'error');
+    return;
+  }
 
   if (selectedProduct === 'slot_gpt_team') {
     const emailText = document.getElementById('modalEmails').value.trim();
@@ -1240,7 +1252,7 @@ async function confirmBuy() {
   btn.textContent = '⏳ Đang xử lý...';
 
   try {
-    const result = await buyProduct(selectedProduct, qty, emails);
+    const result = await buyProduct(selectedProduct, qty, emails, passKey);
     closeModal();
 
     if (result.success) {

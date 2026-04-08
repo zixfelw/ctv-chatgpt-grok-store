@@ -75,6 +75,7 @@ Trong phần **Environment Variables**, thêm:
 |-----|-------|
 | `API_BASE` | `http://103.69.87.202:5000` |
 | `API_KEY` | `DLR_xxxxx` |
+| `PASS_KEY` | `your-secret-buy-pass` |
 
 > [!WARNING]
 > `API_KEY` phải đặt trong Render dashboard, không để cứng trong code.

@@ -5,6 +5,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const API_BASE = process.env.API_BASE || 'http://103.69.87.202:5000';
 const API_KEY = process.env.API_KEY || '';
+const PASS_KEY = process.env.PASS_KEY || process.env['pass-key'] || '';
 
 const ALLOWED_PRODUCTS = [
   'gptplus_1thang_KBH',
@@ -100,6 +101,10 @@ app.get('/api/stock', async (req, res) => {
 
 app.post('/api/buy', async (req, res) => {
   const body = req.body || {};
+
+  if (PASS_KEY && body.pass_key !== PASS_KEY) {
+    return res.status(403).json({ success: false, error: 'Pass-key không đúng.' });
+  }
 
   if (!body.product_key || !ALLOWED_PRODUCTS.includes(body.product_key)) {
     return res.status(400).json({ success: false, error: 'Sản phẩm không hợp lệ.' });
