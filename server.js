@@ -9,6 +9,16 @@ const PASS_KEY = process.env.PASS_KEY || process.env['pass-key'] || '';
 
 app.disable('x-powered-by');
 app.use(express.json({ limit: '1mb' }));
+
+// CORS — cho phép Cloudflare Pages (và bất kỳ frontend nào) gọi API
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method === 'OPTIONS') return res.sendStatus(204);
+  next();
+});
+
 app.use(express.static(__dirname));
 
 async function apiRequest(endpoint, options = {}) {
