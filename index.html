@@ -890,6 +890,75 @@
       color: var(--accent-emerald);
       font-size: 1rem;
     }
+
+    /* ============================================
+       USER SELECTOR
+    ============================================ */
+    .user-selector {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .user-selector-label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+
+    .user-toggle-group {
+      display: flex;
+      gap: 0;
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-pill);
+      padding: 3px;
+      overflow: hidden;
+    }
+
+    .user-toggle-btn {
+      padding: 7px 18px;
+      border: none;
+      border-radius: var(--radius-pill);
+      background: transparent;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      white-space: nowrap;
+      position: relative;
+    }
+
+    .user-toggle-btn:hover {
+      color: var(--text-primary);
+    }
+
+    .user-toggle-btn.active {
+      background: var(--gradient-primary);
+      color: white;
+      box-shadow: 0 2px 10px rgba(99, 102, 241, 0.3);
+    }
+
+    .user-toggle-btn .user-dot {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+
+    .user-toggle-btn .user-dot.dot1 {
+      background: var(--accent-emerald);
+    }
+
+    .user-toggle-btn .user-dot.dot2 {
+      background: var(--accent-amber);
+    }
   </style>
 </head>
 <body>
@@ -920,6 +989,17 @@
   <!-- ===== BALANCE ===== -->
   <div class="config-panel" id="configPanel">
     <h3>🟢 Kết nối hệ thống</h3>
+    <div class="user-selector">
+      <span class="user-selector-label">👤 Chọn tài khoản:</span>
+      <div class="user-toggle-group">
+        <button class="user-toggle-btn active" id="userBtn1" onclick="switchUser('1')">
+          <span class="user-dot dot1"></span>User 1
+        </button>
+        <button class="user-toggle-btn" id="userBtn2" onclick="switchUser('2')">
+          <span class="user-dot dot2"></span>User 2
+        </button>
+      </div>
+    </div>
     <div class="balance-display" id="balanceDisplay" style="display:none; margin-top:0;">
       💰 Số dư: <strong id="balanceValue">0đ</strong>
       <span style="margin-left:8px; color:var(--text-muted);">•</span>
@@ -1013,6 +1093,18 @@ const API_BASE = window.location.origin;
 let productsData = {};
 let currentFilter = 'all';
 let selectedProduct = null;
+let currentUser = '1'; // '1' or '2'
+
+// Switch user function
+function switchUser(user) {
+  currentUser = user;
+  document.getElementById('userBtn1').classList.toggle('active', user === '1');
+  document.getElementById('userBtn2').classList.toggle('active', user === '2');
+  // Reset balance display
+  document.getElementById('balanceDisplay').style.display = 'none';
+  document.getElementById('serviceStatus').textContent = 'Đang chuyển tài khoản...';
+  loadStock();
+}
 
 // Category and display metadata
 const CATEGORY_META = {
@@ -1109,7 +1201,7 @@ async function loadStock() {
   try {
     if (statusEl) statusEl.textContent = 'Đang tải dữ liệu kho hàng...';
 
-    const resp = await fetch(`${API_BASE}/api/stock`);
+    const resp = await fetch(`${API_BASE}/api/stock?user=${currentUser}`);
     const data = await resp.json();
 
     if (data.success) {
@@ -1152,7 +1244,7 @@ async function buyProduct(productKey, qty, emails, passKey) {
     body.emails = emails;
   }
 
-  const resp = await fetch(`${API_BASE}/api/buy`, {
+  const resp = await fetch(`${API_BASE}/api/buy?user=${currentUser}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),

@@ -164,7 +164,9 @@ export default {
 
     const url = new URL(request.url);
     const path = url.pathname;
+    const userParam = url.searchParams.get('user') || '1';
     const { host: apiHost, port: apiPort } = parseApiBase(env.API_BASE || 'http://103.69.87.202:5000');
+    const apiKey = (userParam === '2' && env.API_KEY2) ? env.API_KEY2 : env.API_KEY;
 
     // ===== "/" — Serve Frontend =====
     if (path === '/' || path === '/index.html') {
@@ -177,7 +179,7 @@ export default {
     if (path === '/api/stock' && request.method === 'GET') {
       try {
         const result = await rawHttpRequest(apiHost, apiPort, 'GET', '/api/dealer/stock', {
-          'X-API-KEY': env.API_KEY,
+          'X-API-KEY': apiKey,
         });
         if (result.data.success) {
           result.data.products = filterProducts(result.data.products);
@@ -192,7 +194,7 @@ export default {
     if (path === '/api/balance' && request.method === 'GET') {
       try {
         const result = await rawHttpRequest(apiHost, apiPort, 'GET', '/api/dealer/balance', {
-          'X-API-KEY': env.API_KEY,
+          'X-API-KEY': apiKey,
         });
         return jsonResponse(result.data, result.status, request);
       } catch (e) {
@@ -213,7 +215,7 @@ export default {
 
         const bodyStr = JSON.stringify(body);
         const result = await rawHttpRequest(apiHost, apiPort, 'POST', '/api/dealer/buy', {
-          'X-API-KEY': env.API_KEY,
+          'X-API-KEY': apiKey,
           'Content-Type': 'application/json',
         }, bodyStr);
         return jsonResponse(result.data, result.status, request);
@@ -233,7 +235,7 @@ export default {
         const writer = socket.writable.getWriter();
         const encoder = new TextEncoder();
 
-        const reqStr = `GET /api/dealer/stock HTTP/1.1\r\nHost: ${apiHost}:${apiPort}\r\nX-API-KEY: ${env.API_KEY || 'test'}\r\nConnection: close\r\n\r\n`;
+        const reqStr = `GET /api/dealer/stock HTTP/1.1\r\nHost: ${apiHost}:${apiPort}\r\nX-API-KEY: ${apiKey || 'test'}\r\nConnection: close\r\n\r\n`;
         await writer.write(encoder.encode(reqStr));
         await writer.close();
 
@@ -262,7 +264,8 @@ export default {
       return jsonResponse({
         api_host: apiHost,
         api_port: apiPort,
-        api_key_set: env.API_KEY ? 'yes (' + env.API_KEY.substring(0, 8) + '...)' : 'no',
+        api_key_set: apiKey ? 'yes (' + apiKey.substring(0, 8) + '...)' : 'no',
+        active_user: userParam,
         server_test: serverStatus,
         bytes_received: bytesReceived,
         raw_response_preview: rawResponse,

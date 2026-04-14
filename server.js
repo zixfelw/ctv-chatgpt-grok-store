@@ -5,7 +5,14 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const API_BASE = process.env.API_BASE || 'http://103.69.87.202:5000';
 const API_KEY = process.env.API_KEY || '';
+const API_KEY2 = process.env.API_KEY2 || '';
 const PASS_KEY = process.env.PASS_KEY || process.env['pass-key'] || '';
+
+// Helper: chọn API key theo user param
+function getApiKey(userParam) {
+  if (userParam === '2' && API_KEY2) return API_KEY2;
+  return API_KEY;
+}
 
 app.disable('x-powered-by');
 app.use(express.json({ limit: '1mb' }));
@@ -21,8 +28,9 @@ app.use((req, res, next) => {
 
 app.use(express.static(__dirname));
 
-async function apiRequest(endpoint, options = {}) {
-  if (!API_KEY) {
+async function apiRequest(endpoint, options = {}, apiKey = null) {
+  const key = apiKey || API_KEY;
+  if (!key) {
     return {
       ok: false,
       status: 500,
@@ -32,7 +40,7 @@ async function apiRequest(endpoint, options = {}) {
 
   const url = `${API_BASE}${endpoint}`;
   const headers = {
-    'X-API-KEY': API_KEY,
+    'X-API-KEY': key,
     ...(options.headers || {}),
   };
 
@@ -69,14 +77,16 @@ async function apiRequest(endpoint, options = {}) {
 }
 
 app.get('/api/stock', async (req, res) => {
-  const stockResult = await apiRequest('/api/dealer/stock');
+  const userParam = req.query.user || '1';
+  const apiKey = getApiKey(userParam);
+  const stockResult = await apiRequest('/api/dealer/stock', {}, apiKey);
   if (!stockResult.data.success) {
     return res.status(stockResult.status).json(stockResult.data);
   }
 
   let balance;
   let dealer;
-  const balanceResult = await apiRequest('/api/dealer/balance');
+  const balanceResult = await apiRequest('/api/dealer/balance', {}, apiKey);
   if (balanceResult.data && balanceResult.data.success) {
     balance = balanceResult.data.balance;
     dealer = balanceResult.data.dealer || balanceResult.data.name || balanceResult.data.username;
@@ -91,6 +101,8 @@ app.get('/api/stock', async (req, res) => {
 });
 
 app.post('/api/buy', async (req, res) => {
+  const userParam = req.query.user || '1';
+  const apiKey = getApiKey(userParam);
   const body = req.body || {};
 
   if (PASS_KEY && body.pass_key !== PASS_KEY) {
@@ -120,7 +132,7 @@ app.post('/api/buy', async (req, res) => {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(body),
-  });
+  }, apiKey);
 
   return res.status(result.status).json(result.data);
 });
